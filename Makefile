@@ -25,7 +25,7 @@ release: test ## Create a new release
 	@echo "Please enter the new version number: "
 	@read version; \
 	git tag -a $$version -m "Release $$version"; \
-	git push origin $$version
+	git push origin
 
 ## Help:
 
