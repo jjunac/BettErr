@@ -6,6 +6,20 @@ import (
 	"testing"
 )
 
+func assertTrue(t *testing.T, value bool) {
+	t.Helper()
+	if !value {
+		t.Errorf("\nExpected true, got false")
+	}
+}
+
+func assertFalse(t *testing.T, value bool) {
+	t.Helper()
+	if value {
+		t.Errorf("\nExpected false, got true")
+	}
+}
+
 func assertEqual[T comparable](t *testing.T, expected, actual T) {
 	t.Helper()
 	if expected != actual {

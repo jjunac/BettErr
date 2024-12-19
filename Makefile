@@ -19,6 +19,14 @@ cover: ## Run go test on all modules with coverage
 	go test -coverpkg=./... -coverprofile coverage.out ./... -json | ${TPARSE} -all -progress
 	go tool cover -html=coverage.out -o coverage.html
 
+release: test ## Create a new release
+	@git diff-index --quiet HEAD -- || (echo "\n\033[31mWorking directory is not clean, please commit your changes before creating a new release.\033[0m" && exit 1)
+	@echo "Creating a new release..."
+	@echo "Please enter the new version number: "
+	@read version; \
+	git tag -a $$version -m "Release $$version"; \
+	git push origin $$version
+
 ## Help:
 
 define print_help
