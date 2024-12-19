@@ -1,6 +1,7 @@
 package betterr
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -58,6 +59,10 @@ func Decoratef(err error, format string, args ...any) *BetterError {
 	}
 }
 
+func Is(err, target error) bool {
+    return errors.Is(err, target)
+}
+
 // Formats the error using the default formatter (JavaStyleFormatter by default).
 // You can change the default formatter by setting [DefaultFortmatter]
 func (e *BetterError) Error() string {
@@ -67,4 +72,33 @@ func (e *BetterError) Error() string {
 // Formats the error using the provided [ErrorFormatter]
 func (e *BetterError) Format(errFmt ErrorFormatter) string {
 	return errFmt.Format(e)
+}
+
+// Is reports whether any error in err's tree matches target, as defined by the [errors.Is] interface.
+// For now, it checks if the target error message is equal to one of the error messages in the tree.
+func (e *BetterError) Is(target error) bool {
+	if e == target {
+		return true
+	}
+	if betterrTarget, ok := target.(*BetterError); ok {
+		if e.Msg == betterrTarget.Msg {
+			return true
+		}
+		if e.Wrapped != nil {
+			return Is(e.Wrapped, target)
+		}
+	}
+	if e.Msg == target.Error() {
+		return true
+	}
+	if e.Wrapped != nil {
+		return Is(e.Wrapped, target)
+	}
+	return false
+}
+
+
+// Returns the wrapped error, if any, as defined by the [errors.Unwrap] interface.
+func (e *BetterError) Unwrap() error {
+	return e.Wrapped
 }

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestGoStyleFormatter(t *testing.T) {
+func TestErrorFormatter(t *testing.T) {
 	testCases := []struct {
 		err               error
 		expectedRegexGo   string
@@ -25,50 +25,58 @@ func TestGoStyleFormatter(t *testing.T) {
 			err:             New("A BetterError error"),
 			expectedRegexGo: "A BetterError error",
 			expectedRegexJava: "A BetterError error\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
-				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n",
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n" +
+				"    at runtime\\.goexit \\(.*\\)\n",
 		},
 		{
 			err:             Wrap(errors.New("A wrapped plain Go error")),
 			expectedRegexGo: "A wrapped plain Go error",
 			expectedRegexJava: "A wrapped plain Go error\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
-				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n",
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n" +
+				"    at runtime\\.goexit \\(.*\\)\n",
 		},
 		{
 			err:             Wrap(New("A wrapped BetterError error")),
 			expectedRegexGo: "A wrapped BetterError error",
 			expectedRegexJava: "A wrapped BetterError error\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
-				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n",
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n" +
+				"    at runtime\\.goexit \\(.*\\)\n",
 		},
 		{
 			err:             Decorate(errors.New("A plain Go error"), "Decorated"),
 			expectedRegexGo: "Decorated: A plain Go error",
 			expectedRegexJava: "Decorated\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
 				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\\\n" +
+				"    at runtime\\.goexit \\(.*\\)\n" +
 				"Caused by: A plain Go error",
 		},
 		{
 			err:             Decorate(New("A BetterError error"), "Decorated"),
 			expectedRegexGo: "Decorated: A BetterError error",
 			expectedRegexJava: "Decorated\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
 				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\\\n" +
+				"    at runtime\\.goexit \\(.*\\)\n" +
 				"Caused by: A BetterError error\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
-				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n",
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\n" +
+				"    at runtime\\.goexit \\(.*\\)\n",
 		},
 		{
 			err:             Decoratef(Decorate(errors.New("A plain Go error"), "Decorated"), "A %s level of decoration", "second"),
 			expectedRegexGo: "A second level of decoration: Decorated: A plain Go error",
 			expectedRegexJava: "A second level of decoration\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
 				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\\\n" +
+				"    at runtime\\.goexit \\(.*\\)\n" +
 				"Caused by: Decorated\n" +
-				"    at github\\.com/jjunac/betterr\\.TestGoStyleFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
+				"    at github\\.com/jjunac/betterr\\.TestErrorFormatter \\(.*/betterr_test.go:\\d+\\)\n" +
 				"    at testing\\.tRunner \\(.*/go/src/testing/testing.go:\\d+\\)\\\n" +
+				"    at runtime\\.goexit \\(.*\\)\n" +
 				"Caused by: A plain Go error",
 		},
 	}
@@ -99,7 +107,7 @@ func (s *mockedStacktrace) FramesLen() int {
 	return len(s.frames)
 }
 
-func TestGoStyleFormatter_MockedStacktrace(t *testing.T) {
+func TestErrorFormatter_MockedStacktrace(t *testing.T) {
 	GetStacktrace = func(skip int) Stacktrace {
 		return &mockedStacktrace{
 			frames: []StackFrames{
@@ -111,6 +119,10 @@ func TestGoStyleFormatter_MockedStacktrace(t *testing.T) {
 			},
 		}
 	}
+
+	defer func() {
+		GetStacktrace = NewRuntimeStacktrace
+	}()
 
 	baseErr := New("something went wrong")
 
@@ -173,4 +185,58 @@ func TestGoStyleFormatter_MockedStacktrace(t *testing.T) {
 	expectedJsonBytes, err := json.Marshal(expectedJson)
 	assertNoError(t, err)
 	assertJSONEq(t, string(expectedJsonBytes), new(JsonFormatter).Format(decoratedErr))
+}
+
+func TestIs(t *testing.T) {
+	testCases := []struct {
+		name      string
+		targetErr error
+	}{
+		{
+			"A plain Go error",
+			errors.New("A plain Go error"),
+		},
+		{
+			"A better error",
+			New("A better error"),
+		},
+		{
+			"A wrapped plain Go error",
+			Wrap(errors.New("A wrapped plain Go error")),
+		},
+		{
+			"A wrapped better error",
+			Wrap(New("A wrapped better error")),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// We should not match nil or other errors
+			assertFalse(t, Is(nil, tc.targetErr))
+			assertFalse(t, Is(tc.targetErr, nil))
+			assertFalse(t, Is(New("Another error"), tc.targetErr))
+			assertFalse(t, Is(errors.New("A plain other error"), tc.targetErr))
+
+			// We should match all the variations of the error itself, New with same message, Wrap, Decorate and Decoratef
+			assertTrue(t, Is(tc.targetErr, tc.targetErr))
+			assertTrue(t, Is(New(tc.name), tc.targetErr))
+			assertTrue(t, Is(Wrap(tc.targetErr), tc.targetErr))
+			assertTrue(t, Is(Decorate(tc.targetErr, "Decorated"), tc.targetErr))
+			assertTrue(t, Is(Decoratef(tc.targetErr, "Decorated %s", "yolo"), tc.targetErr))
+
+			// We should match as well when we call the member Is instead of the package one
+			assertTrue(t, New(tc.name).Is(tc.targetErr))
+			assertTrue(t, Wrap(tc.targetErr).Is(tc.targetErr))
+			assertTrue(t, Decorate(tc.targetErr, "Decorated").Is(tc.targetErr))
+			assertTrue(t, Decoratef(tc.targetErr, "Decorated %s", "yolo").Is(tc.targetErr))
+		})
+	}
+
+}
+
+func TestIs_WhenSubpartOfTheError(t *testing.T) {
+	targetErr := New("table not found")
+	// For now, we don't support this feature. Maybe we'll do eventually.
+	assertFalse(t, Is(New("table not found 'test'"), targetErr))
 }

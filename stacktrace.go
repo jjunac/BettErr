@@ -30,11 +30,10 @@ func NewRuntimeStacktrace(skip int) Stacktrace {
 func (s RuntimeStacktrace) GetFrames() []StackFrames {
 	frames := runtime.CallersFrames(s.Stack)
 	var frameList []StackFrames
-	for {
-		frame, more := frames.Next()
-		if !more {
-			break
-		}
+	var frame runtime.Frame 
+	more := true
+	for more {
+		frame, more = frames.Next()
 		frameList = append(frameList, StackFrames{
 			File:     frame.File,
 			Function: frame.Function,
