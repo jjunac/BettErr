@@ -6,7 +6,7 @@ import (
 )
 
 func method_1deep() *BetterError {
-	return New("A BetterError error")
+	return New("A BetterError error").(*BetterError)
 }
 
 func method_2deep() *BetterError {
@@ -14,7 +14,7 @@ func method_2deep() *BetterError {
 }
 
 func method_2deep_nested() *BetterError {
-	return New("A nested error")
+	return New("A nested error").(*BetterError)
 }
 
 func TestRuntimeStacktrace_1Deep(t *testing.T) {

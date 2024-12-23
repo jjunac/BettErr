@@ -226,10 +226,10 @@ func TestIs(t *testing.T) {
 			assertTrue(t, Is(Decoratef(tc.targetErr, "Decorated %s", "yolo"), tc.targetErr))
 
 			// We should match as well when we call the member Is instead of the package one
-			assertTrue(t, New(tc.name).Is(tc.targetErr))
-			assertTrue(t, Wrap(tc.targetErr).Is(tc.targetErr))
-			assertTrue(t, Decorate(tc.targetErr, "Decorated").Is(tc.targetErr))
-			assertTrue(t, Decoratef(tc.targetErr, "Decorated %s", "yolo").Is(tc.targetErr))
+			assertTrue(t, New(tc.name).(*BetterError).Is(tc.targetErr))
+			assertTrue(t, Wrap(tc.targetErr).(*BetterError).Is(tc.targetErr))
+			assertTrue(t, Decorate(tc.targetErr, "Decorated").(*BetterError).Is(tc.targetErr))
+			assertTrue(t, Decoratef(tc.targetErr, "Decorated %s", "yolo").(*BetterError).Is(tc.targetErr))
 		})
 	}
 
@@ -239,4 +239,15 @@ func TestIs_WhenSubpartOfTheError(t *testing.T) {
 	targetErr := New("table not found")
 	// For now, we don't support this feature. Maybe we'll do eventually.
 	assertFalse(t, Is(New("table not found 'test'"), targetErr))
+}
+
+func TestWrap_ShouldNotWrapNil(t *testing.T) {
+	assertEqual(t, nil, Wrap(nil))
+	assertTrue(t, Wrap(nil) == nil)
+}
+
+func TestDecorate_ShouldNotDecorateNil(t *testing.T) {
+	assertEqual(t, nil, Decorate(nil, "message"))
+	assertEqual(t, nil, Decoratef(nil, "%s", "message"))
+	assertTrue(t, Decorate(nil, "message") == nil)
 }

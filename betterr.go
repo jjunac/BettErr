@@ -16,7 +16,7 @@ var GetStacktrace func(skip int)Stacktrace = NewRuntimeStacktrace
 // Creates a new BetterError with the provided message.
 // The stack trace will start from the caller of this function.
 // This would be the equivalent of Go's errors.New(msg) or Java's new Exception(msg).
-func New(msg string) *BetterError {
+func New(msg string) error {
 	return &BetterError{
 		Msg:   msg,
 		Stack: GetStacktrace(1),
@@ -27,7 +27,11 @@ func New(msg string) *BetterError {
 // Usually used to wrap errors that are not BetterError.
 // The stack trace will start from the caller of this function.
 // If the error is already a BetterError, it will return the error as is.
-func Wrap(err error) *BetterError {
+//  Wrapping a nil error will return nil.
+func Wrap(err error) error {
+	if err == nil {
+		return nil
+	}
 	if betterr, ok := err.(*BetterError); ok {
 		return betterr
 	} else {
@@ -38,10 +42,14 @@ func Wrap(err error) *BetterError {
 	}
 }
 
-// Wraps the error in a BetterError and adds a message.
+// Decorates the error in a BetterError and adds a message.
 // Usually used to add a message to an existing error, to provide more context.
 // This would be the equivalent of Go's fmt.Errorf("%s: %w", msg, err), or Java's new Exception(msg, err).
-func Decorate(err error, msg string) *BetterError {
+// Decorating a nil error will return nil.
+func Decorate(err error, msg string) error {
+	if err == nil {
+		return nil
+	}
 	return &BetterError{
 		Msg:   msg,
 		Wrapped: err,
@@ -49,9 +57,12 @@ func Decorate(err error, msg string) *BetterError {
 	}
 }
 
-// Wraps the error in a BetterError and adds a formatted message.
+// Decorates the error in a BetterError and adds a formatted message.
 // See [Decorate] for more information.
-func Decoratef(err error, format string, args ...any) *BetterError {
+func Decoratef(err error, format string, args ...any) error {
+	if err == nil {
+		return nil
+	}
 	return &BetterError{
 		Msg:   fmt.Sprintf(format, args...),
 		Wrapped: err,
