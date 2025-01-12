@@ -251,3 +251,9 @@ func TestDecorate_ShouldNotDecorateNil(t *testing.T) {
 	assertEqual(t, nil, Decoratef(nil, "%s", "message"))
 	assertTrue(t, Decorate(nil, "message") == nil)
 }
+
+func TestErrorf(t *testing.T) {
+	err := Errorf("A formatted %s: %d", "error message", 1234)
+	assertTrue(t, Is(err, New("A formatted error message: 1234")))
+	assertEqual(t, "A formatted error message: 1234", new(GoStyleFormatter).Format(err))
+}

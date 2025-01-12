@@ -23,6 +23,15 @@ func New(msg string) error {
 	}
 }
 
+// Creates a new BetterError with the provided formatted message.
+// See [New] for more information.
+func Errorf(format string, args ...any) error {
+	return &BetterError{
+		Msg:   fmt.Sprintf(format, args...),
+		Stack: GetStacktrace(1),
+	}
+}
+
 // Wraps the error in a BetterError.
 // Usually used to wrap errors that are not BetterError.
 // The stack trace will start from the caller of this function.
